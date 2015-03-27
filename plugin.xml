@@ -1,0 +1,52 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<?eclipse version="3.0"?>
+<plugin>
+
+   <!-- This is an example for providing an own category 
+      <extension
+         point="org.knime.workbench.repository.categories">
+      <category
+            description="Category containing my nodes"
+            icon="icons/default.png"
+            level-id="myNodes"
+            name="My nodes"
+            path="/"/>
+   </extension>
+   -->
+   
+   <extension
+         point="org.knime.workbench.repository.nodes">
+      <node
+            category-path="/"
+            factory-class="de.mpc.tools.knimeproteinprophet.ProteinProphetNodeFactory"
+            id="de.mpc.tools.knimeproteinprophet.ProteinProphetNodeFactory"/>
+   </extension>
+   <extension
+         point="org.knime.base.filehandling.mimetypes">
+      <mimetype
+            name="application/x-PROTXML">
+         <fileextension
+               name="protxml">
+         </fileextension>
+         <fileextension
+               name="protXML">
+         </fileextension>
+      </mimetype>
+      <mimetype
+            name="application/x-PEPXML">
+         <fileextension
+               name="pepxml">
+         </fileextension>
+         <fileextension
+               name="pepXML">
+         </fileextension>
+      </mimetype>
+      <mimetype
+            name="application/x-FASTA">
+         <fileextension
+               name="fasta">
+         </fileextension>
+      </mimetype>
+   </extension>
+   
+</plugin>

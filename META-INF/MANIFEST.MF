@@ -1,0 +1,17 @@
+Manifest-Version: 1.0
+Bundle-ManifestVersion: 2
+Bundle-Name: ProteinProphet-Node extension for KNIME Workbench
+Bundle-SymbolicName: de.mpc.tools.knimeproteinprophet; singleton:=true
+Bundle-Version: 0.0.1
+Bundle-ClassPath: proteinprophet.jar
+Bundle-Activator: de.mpc.tools.knimeproteinprophet.ProteinProphetNodePlugin
+Bundle-Vendor: julianu
+Require-Bundle: org.eclipse.core.runtime,
+ org.knime.core.data.uritype,
+ org.knime.workbench.core,
+ org.knime.workbench.repository,
+ org.knime.base
+Bundle-ActivationPolicy: lazy
+Export-Package: de.mpc.tools.knimeproteinprophet
+Bundle-RequiredExecutionEnvironment: JavaSE-1.6
+

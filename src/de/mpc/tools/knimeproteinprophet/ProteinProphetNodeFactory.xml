@@ -1,0 +1,36 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<knimeNode icon="./default.png" type="Source" xmlns="http://knime.org/node/v2.8" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://knime.org/node/v2.10 http://knime.org/node/v2.10.xsd">
+    <name>ProteinProphet</name>
+    
+    <shortDescription>
+        KNIME node to perform ProteinProphet inference
+    </shortDescription>
+    
+    <fullDescription>
+        <intro>This node calls xinteract and ProteinProphet on the given pepXML file(s), using the given FASTA database and enzyme settings.</intro>
+        
+        <option name="Enzyme">the enzyme used for digesting the proteins</option>
+        <option name="decoy prefix">prefix of to pin-down the decoy entries in the database</option>
+        <option name="Threads">maximal number of used threads</option>
+        
+        <!--
+        <tab name="Standard Options">
+            <option name="short name of first option (like in the dialog)">description of first option</option>
+            <option name="short name of second option (like in the dialog)">description of second option</option>
+        </tab>
+        <tab name="Advanced Options">
+            <option name="short name of first advanced option (like in the dialog)">description of first advanced option</option>
+        </tab>
+        -->
+    </fullDescription>
+    
+    <ports>
+        <inPort index="0" name="pepXML files">The peptides in pepXML format, ready to be run by xinteract, i.e. the peptide probabilities should be calculated before.</inPort>
+        <inPort index="1" name="FASTA database">The FASTA database file used for the peptide identification.</inPort>
+        <outPort index="0" name="protXML">protXML file containing the output of PeptideProphet.</outPort>
+    </ports>    
+    <views>
+        <view index="0" name="Std Output">The text sent to standard out during the execution of xinteract and PeptideProphet.</view>
+        <view index="1" name="Error Output">The text sent to standard error during the execution of xinteract and PeptideProphet. (If it appears in gray, it's the output of a previously failing run which is preserved for your trouble shooting.)</view>
+    </views>
+</knimeNode>
