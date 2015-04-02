@@ -28,6 +28,7 @@
         <inPort index="0" name="pepXML files">The peptides in pepXML format, ready to be run by xinteract, i.e. the peptide probabilities should be calculated before.</inPort>
         <inPort index="1" name="FASTA database">The FASTA database file used for the peptide identification.</inPort>
         <outPort index="0" name="protXML">protXML file containing the output of PeptideProphet.</outPort>
+        <outPort index="1" name="xls">TAB separated file containing the output of PeptideProphet.</outPort>
     </ports>    
     <views>
         <view index="0" name="Std Output">The text sent to standard out during the execution of xinteract and PeptideProphet.</view>

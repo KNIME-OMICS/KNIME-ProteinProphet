@@ -42,8 +42,12 @@ public class ProteinProphetRunnable implements Runnable {
 	/** the currently running thread */
 	private Process runningProcess = null;
 	
-	/** the final file */
+	/** the final protXML file */
 	private String protXMLFile;
+	
+	/** the final tab separated file */
+	private String excelFile;
+	
 	
 	public ProteinProphetRunnable(List<String> pepXMLfiles, String fastaFile, String enzyme, String decoyPrefix, Integer threads,
 			String execXinteract, String execProteinProphet, String executionDirectory,
@@ -59,6 +63,7 @@ public class ProteinProphetRunnable implements Runnable {
 		this.output = output;
 		this.errorOutput = errorOutput;
 		this.protXMLFile = null;
+		this.excelFile = null;
     }
     
     
@@ -104,7 +109,9 @@ public class ProteinProphetRunnable implements Runnable {
 					executionDirectory + File.separator + "xinteractout.ipro.pep.xml",
 					executionDirectory + File.separator + "proteinprophet.protXML",
 					"IPROPHET",
-					"MINPROB0.5");
+					"MINPROB0.5",
+					"NOPLOT",
+					"EXCELPEPS");
 			
 			runningProcess = processB.start();
 			
@@ -122,9 +129,11 @@ public class ProteinProphetRunnable implements Runnable {
 			}
 			
 			protXMLFile = executionDirectory + File.separator + "proteinprophet.protXML";
+			excelFile = executionDirectory + File.separator + "proteinprophet.xls";
 		} catch (IOException e) {
 			ProteinProphetNodeModel.logger.error("Error while executing", e);
 			protXMLFile = null;
+			excelFile = null;
 		}
 	}
 	
@@ -135,5 +144,14 @@ public class ProteinProphetRunnable implements Runnable {
 	 */
 	public String getProtXMLFile() {
 		return protXMLFile;
+	}
+	
+	
+	/**
+	 * returns the path to the created excel file
+	 * @return
+	 */
+	public String getExcelFile() {
+		return excelFile;
 	}
 }

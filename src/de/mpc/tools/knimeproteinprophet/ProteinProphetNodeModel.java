@@ -20,6 +20,8 @@ import java.util.List;
 import java.util.ListIterator;
 import java.util.Map;
 import java.util.Random;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 import org.knime.base.node.util.exttool.ExtToolOutputNodeModel;
 import org.knime.core.data.uri.IURIPortObject;
@@ -113,7 +115,7 @@ public class ProteinProphetNodeModel extends ExtToolOutputNodeModel {
 	protected ProteinProphetNodeModel() {
 		// two incoming URI ports, one outgoing URI port
 		super(new PortType[]{IURIPortObject.TYPE, IURIPortObject.TYPE},
-				new PortType[]{IURIPortObject.TYPE});
+				new PortType[]{IURIPortObject.TYPE, IURIPortObject.TYPE});
 	}
 	
 	
@@ -197,28 +199,33 @@ public class ProteinProphetNodeModel extends ExtToolOutputNodeModel {
 		
 		
 		String protXMLFile = pprunner.getProtXMLFile();
-		List<URIContent> outContent = new ArrayList<URIContent>();
+		List<URIContent> outProtXML = new ArrayList<URIContent>();
+		List<URIContent> outXLS = new ArrayList<URIContent>();
 		
 		if ((protXMLFile != null) && Files.exists(new File(protXMLFile).toPath(), new LinkOption[]{})) {
-			outContent.add(new URIContent(new File(protXMLFile).toURI(), "protXML"));
+			outProtXML.add(new URIContent(new File(protXMLFile).toURI(), "protXML"));
+			outXLS.add(new URIContent(new File(pprunner.getExcelFile()).toURI(), "xls"));
 			
 			setExternalOutput(externalOutput);
 			setExternalErrorOutput(externalErrorOutput);
 		} else {
-			setExternalOutput(externalOutput);
+			setFailedExternalOutput(externalOutput);
 			setFailedExternalErrorOutput(externalErrorOutput);
 			throw new Exception("Error while executing ProteinProphet.");
 		}
 		
-		URIPortObject outport = new URIPortObject(outContent);
+		URIPortObject outProtXMLPort = new URIPortObject(outProtXML);
+		URIPortObject outXLSPort = new URIPortObject(outXLS);
 		
-        return new PortObject[]{outport};
+        return new PortObject[]{outProtXMLPort, outXLSPort};
 	}
 	
 	
 	/**
 	 * Checks the input file for errors and corrects them while copying the
-	 * file and returning the new filename.
+	 * file and returning the new filename.<p>
+	 * Additionally, it needs to change the search-engine name to avoid trouble
+	 * with unneeded corrections.
 	 * 
 	 * @param fileName
 	 * @return
@@ -228,6 +235,7 @@ public class ProteinProphetNodeModel extends ExtToolOutputNodeModel {
 		
 		boolean containsEnzyme = false;
 		
+		// pre-check the file
 		InputStream fis = new FileInputStream(fileName);
 		InputStreamReader isr = new InputStreamReader(fis);
 		BufferedReader br = new BufferedReader(isr);
@@ -242,33 +250,36 @@ public class ProteinProphetNodeModel extends ExtToolOutputNodeModel {
 		br.close();
 		
 		
-		if (!containsEnzyme) {
-			logger.warn(fileName + " needs to add the enzyme tag, file will be copied for this.");
-			
-			// need to add the enzyme to the file
-			fis = new FileInputStream(fileName);
-			isr = new InputStreamReader(fis);
-			br = new BufferedReader(isr);
-			
-			newFilename = tmpDir.getAbsolutePath() + File.separator + new File(fileName).getName();
-			FileWriter out = new FileWriter(newFilename);
-			BufferedWriter bw = new BufferedWriter(out);
-			
-			while ((line = br.readLine()) != null) {
-				
-				bw.append(line);
-				bw.append("\n");
-				
-				if (line.contains("<msms_run_summary")) {
-					// add the enzyme tag here
-					bw.append(createEnzymeTag(enzymeShort));
-					bw.append("\n");
-				}
+		// now copy the file and perform corrections
+		fis = new FileInputStream(fileName);
+		isr = new InputStreamReader(fis);
+		br = new BufferedReader(isr);
+		
+		newFilename = tmpDir.getAbsolutePath() + File.separator + new File(fileName).getName();
+		FileWriter out = new FileWriter(newFilename);
+		BufferedWriter bw = new BufferedWriter(out);
+		
+		Pattern se_pattern = Pattern.compile(".*search_engine=\"([^\"]*)\".*");
+		
+		while ((line = br.readLine()) != null) {
+			Matcher se_matcher = se_pattern.matcher(line);
+			if (se_matcher.matches()) {
+				line = line.replaceAll("search_engine=\"[^\"]*\"", "search_engine=\"" + se_matcher.group(1) + "-correct\"");
 			}
 			
-			bw.close();
-			br.close();
+			bw.append(line);
+			bw.append("\n");
+			
+			if (!containsEnzyme && line.contains("<msms_run_summary")) {
+				// add the enzyme tag here
+				logger.warn(fileName + " needs to add the enzyme tag.");
+				bw.append(createEnzymeTag(enzymeShort));
+				bw.append("\n");
+			}
 		}
+		
+		bw.close();
+		br.close();
 		
 		return newFilename;
 	}
@@ -339,8 +350,9 @@ public class ProteinProphetNodeModel extends ExtToolOutputNodeModel {
 			e.printStackTrace();
 		}
 		
-        PortObjectSpec[] out_spec = new PortObjectSpec[1];
+        PortObjectSpec[] out_spec = new PortObjectSpec[2];
         out_spec[0] = new URIPortObjectSpec(new String[]{"protxml", "protXML", "XML"});
+        out_spec[1] = new URIPortObjectSpec(new String[]{"xls"});
         
         return out_spec;
 	}
