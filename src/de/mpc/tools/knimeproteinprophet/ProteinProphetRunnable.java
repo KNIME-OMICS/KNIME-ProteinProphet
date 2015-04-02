@@ -18,6 +18,9 @@ public class ProteinProphetRunnable implements Runnable {
 	/** the used enzyme (in pepXML annotation, i.e. T=Trypsin,  C=Chymotrypsin etc.)*/
 	private String enzyme;
 	
+	/** the minimal peptide probability to use */
+	private Double peptide_prob;
+	
 	/** the decoy prefix */
 	private String decoyPrefix;
 	
@@ -49,12 +52,13 @@ public class ProteinProphetRunnable implements Runnable {
 	private String excelFile;
 	
 	
-	public ProteinProphetRunnable(List<String> pepXMLfiles, String fastaFile, String enzyme, String decoyPrefix, Integer threads,
-			String execXinteract, String execProteinProphet, String executionDirectory,
+	public ProteinProphetRunnable(List<String> pepXMLfiles, String fastaFile, String enzyme, Double peptide_prob, String decoyPrefix,
+			Integer threads, String execXinteract, String execProteinProphet, String executionDirectory,
 			List<String> output, List<String> errorOutput) {
 		this.pepXMLfiles = pepXMLfiles;
 		this.fastaFile = fastaFile;
 		this.enzyme = enzyme;
+		this.peptide_prob = peptide_prob;
 		this.decoyPrefix = decoyPrefix;
 		this.threads = threads;
 		this.execXinteract = execXinteract;
@@ -109,7 +113,7 @@ public class ProteinProphetRunnable implements Runnable {
 					executionDirectory + File.separator + "xinteractout.ipro.pep.xml",
 					executionDirectory + File.separator + "proteinprophet.protXML",
 					"IPROPHET",
-					"MINPROB0.5",
+					"MINPROB" + peptide_prob,
 					"NOPLOT",
 					"EXCELPEPS");
 			

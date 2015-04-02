@@ -4,8 +4,8 @@ import org.knime.core.node.defaultnodesettings.DefaultNodeSettingsPane;
 import org.knime.core.node.defaultnodesettings.DialogComponentNumber;
 import org.knime.core.node.defaultnodesettings.DialogComponentString;
 import org.knime.core.node.defaultnodesettings.DialogComponentStringSelection;
+import org.knime.core.node.defaultnodesettings.SettingsModelDoubleBounded;
 import org.knime.core.node.defaultnodesettings.SettingsModelInteger;
-import org.knime.core.node.defaultnodesettings.SettingsModelIntegerBounded;
 import org.knime.core.node.defaultnodesettings.SettingsModelString;
 
 /**
@@ -31,6 +31,10 @@ public class ProteinProphetNodeDialog extends DefaultNodeSettingsPane {
 		addDialogComponent(new DialogComponentStringSelection(
 				new SettingsModelString(ProteinProphetNodeModel.CFGKEY_ENZYME, ProteinProphetNodeModel.DEFAULT_ENZYME),
 				"Enzyme:", ProteinProphetNodeModel.ALLOWED_ENZYMES));
+		
+		addDialogComponent(new DialogComponentNumber(
+				new SettingsModelDoubleBounded(ProteinProphetNodeModel.CFGKEY_MINPEPPROB, ProteinProphetNodeModel.DEFAULT_MINPEPPROB, 0.0, 1.0),
+				"minimal peptide probability:", 0.01));
 		
 		addDialogComponent(new DialogComponentString(
 				new SettingsModelString(ProteinProphetNodeModel.CFGKEY_DECOYPREFIX, ProteinProphetNodeModel.DEFAULT_DECOYPREFIX),

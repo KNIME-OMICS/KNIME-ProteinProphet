@@ -29,6 +29,8 @@ import org.knime.core.data.uri.URIContent;
 import org.knime.core.data.uri.URIPortObject;
 import org.knime.core.data.uri.URIPortObjectSpec;
 import org.knime.core.node.CanceledExecutionException;
+import org.knime.core.node.defaultnodesettings.SettingsModelDouble;
+import org.knime.core.node.defaultnodesettings.SettingsModelDoubleBounded;
 import org.knime.core.node.defaultnodesettings.SettingsModelInteger;
 import org.knime.core.node.defaultnodesettings.SettingsModelString;
 import org.knime.core.node.port.PortObject;
@@ -82,6 +84,13 @@ public class ProteinProphetNodeModel extends ExtToolOutputNodeModel {
 	
 	private final SettingsModelString m_enzyme =
 			new SettingsModelString(ProteinProphetNodeModel.CFGKEY_ENZYME, ProteinProphetNodeModel.DEFAULT_ENZYME);
+	
+	
+	static final String CFGKEY_MINPEPPROB = "min_pep_prob";
+	static final Double DEFAULT_MINPEPPROB = 0.9;
+	
+	private final SettingsModelDouble m_pepprob =
+			new SettingsModelDoubleBounded(ProteinProphetNodeModel.CFGKEY_MINPEPPROB, ProteinProphetNodeModel.DEFAULT_MINPEPPROB, 0.0, 1.0);
 	
 	
 	static final String CFGKEY_DECOYPREFIX = "Decoyprefix";
@@ -179,8 +188,9 @@ public class ProteinProphetNodeModel extends ExtToolOutputNodeModel {
 		LinkedList<String> externalErrorOutput = new LinkedList<String>();
 		
 		ProteinProphetRunnable pprunner =
-				new ProteinProphetRunnable(inputFiles, fastaFile, enzyme, m_decoyprefix.getStringValue(), m_threads.getIntValue(),
-						execXinteract.getAbsolutePath(), execProteinProphet.getAbsolutePath(), dir.getAbsolutePath(),
+				new ProteinProphetRunnable(inputFiles, fastaFile, enzyme, m_pepprob.getDoubleValue(),
+						m_decoyprefix.getStringValue(), m_threads.getIntValue(), execXinteract.getAbsolutePath(),
+						execProteinProphet.getAbsolutePath(), dir.getAbsolutePath(),
 						externalOutput, externalErrorOutput);
 		
 		executionThread = new Thread(pprunner);
@@ -364,6 +374,7 @@ public class ProteinProphetNodeModel extends ExtToolOutputNodeModel {
 	@Override
 	protected void saveSettingsTo(final NodeSettingsWO settings) {
 		m_enzyme.saveSettingsTo(settings);
+		m_pepprob.saveSettingsTo(settings);
 		m_decoyprefix.saveSettingsTo(settings);
 		m_threads.saveSettingsTo(settings);
 	}
@@ -376,6 +387,7 @@ public class ProteinProphetNodeModel extends ExtToolOutputNodeModel {
 	protected void loadValidatedSettingsFrom(final NodeSettingsRO settings)
 			throws InvalidSettingsException {
 		m_enzyme.loadSettingsFrom(settings);
+		m_pepprob.loadSettingsFrom(settings);
 		m_decoyprefix.loadSettingsFrom(settings);
 		m_threads.loadSettingsFrom(settings);
 	}
@@ -388,6 +400,7 @@ public class ProteinProphetNodeModel extends ExtToolOutputNodeModel {
 	protected void validateSettings(final NodeSettingsRO settings)
 			throws InvalidSettingsException {
 		m_enzyme.validateSettings(settings);
+		m_pepprob.validateSettings(settings);
 		m_decoyprefix.validateSettings(settings);
 		m_threads.validateSettings(settings);
 	}

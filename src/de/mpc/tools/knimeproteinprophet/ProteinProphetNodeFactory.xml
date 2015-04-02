@@ -10,6 +10,7 @@
         <intro>This node calls xinteract and ProteinProphet on the given pepXML file(s), using the given FASTA database and enzyme settings.</intro>
         
         <option name="Enzyme">the enzyme used for digesting the proteins</option>
+        <option name="minimal peptide probability">the minimal peptide probability used for the ProteinProphet</option>
         <option name="decoy prefix">prefix of to pin-down the decoy entries in the database</option>
         <option name="Threads">maximal number of used threads</option>
         
