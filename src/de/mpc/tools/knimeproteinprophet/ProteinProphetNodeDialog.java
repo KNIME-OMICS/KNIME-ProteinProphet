@@ -1,9 +1,11 @@
 package de.mpc.tools.knimeproteinprophet;
 
 import org.knime.core.node.defaultnodesettings.DefaultNodeSettingsPane;
+import org.knime.core.node.defaultnodesettings.DialogComponentBoolean;
 import org.knime.core.node.defaultnodesettings.DialogComponentNumber;
 import org.knime.core.node.defaultnodesettings.DialogComponentString;
 import org.knime.core.node.defaultnodesettings.DialogComponentStringSelection;
+import org.knime.core.node.defaultnodesettings.SettingsModelBoolean;
 import org.knime.core.node.defaultnodesettings.SettingsModelDoubleBounded;
 import org.knime.core.node.defaultnodesettings.SettingsModelInteger;
 import org.knime.core.node.defaultnodesettings.SettingsModelString;
@@ -35,6 +37,14 @@ public class ProteinProphetNodeDialog extends DefaultNodeSettingsPane {
 		addDialogComponent(new DialogComponentNumber(
 				new SettingsModelDoubleBounded(ProteinProphetNodeModel.CFGKEY_MINPEPPROB, ProteinProphetNodeModel.DEFAULT_MINPEPPROB, 0.0, 1.0),
 				"minimal peptide probability:", 0.01));
+		
+		addDialogComponent(new DialogComponentBoolean(
+				new SettingsModelBoolean(ProteinProphetNodeModel.CFGKEY_CORRECTPROBS, ProteinProphetNodeModel.DEFAULT_CORRECTPROBS),
+				"correct probability from error probability"));
+		
+		addDialogComponent(new DialogComponentBoolean(
+				new SettingsModelBoolean(ProteinProphetNodeModel.CFGKEY_IPROPHET, ProteinProphetNodeModel.DEFAULT_IPROPHET),
+				"use iProphet"));
 		
 		addDialogComponent(new DialogComponentString(
 				new SettingsModelString(ProteinProphetNodeModel.CFGKEY_DECOYPREFIX, ProteinProphetNodeModel.DEFAULT_DECOYPREFIX),

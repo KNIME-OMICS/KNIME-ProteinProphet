@@ -11,6 +11,8 @@
         
         <option name="Enzyme">the enzyme used for digesting the proteins</option>
         <option name="minimal peptide probability">the minimal peptide probability used for the ProteinProphet</option>
+        <option name="correct probability from error probability">if error probabilities are in the pepXMl file, correct them to be probabilities (by calculating 1-p)</option>
+        <option name="use iProphet">whether or not to use iProphet</option>
         <option name="decoy prefix">prefix of to pin-down the decoy entries in the database</option>
         <option name="Threads">maximal number of used threads</option>
         

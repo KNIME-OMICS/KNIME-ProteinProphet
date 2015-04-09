@@ -29,6 +29,7 @@ import org.knime.core.data.uri.URIContent;
 import org.knime.core.data.uri.URIPortObject;
 import org.knime.core.data.uri.URIPortObjectSpec;
 import org.knime.core.node.CanceledExecutionException;
+import org.knime.core.node.defaultnodesettings.SettingsModelBoolean;
 import org.knime.core.node.defaultnodesettings.SettingsModelDouble;
 import org.knime.core.node.defaultnodesettings.SettingsModelDoubleBounded;
 import org.knime.core.node.defaultnodesettings.SettingsModelInteger;
@@ -91,6 +92,20 @@ public class ProteinProphetNodeModel extends ExtToolOutputNodeModel {
 	
 	private final SettingsModelDouble m_pepprob =
 			new SettingsModelDoubleBounded(ProteinProphetNodeModel.CFGKEY_MINPEPPROB, ProteinProphetNodeModel.DEFAULT_MINPEPPROB, 0.0, 1.0);
+	
+	
+	static final String CFGKEY_CORRECTPROBS = "correct_probabilities";
+	static final Boolean DEFAULT_CORRECTPROBS = false;
+	
+	private final SettingsModelBoolean m_correctprobs =
+			new SettingsModelBoolean(ProteinProphetNodeModel.CFGKEY_CORRECTPROBS, ProteinProphetNodeModel.DEFAULT_CORRECTPROBS);
+	
+	
+	static final String CFGKEY_IPROPHET = "use_iprophet";
+	static final Boolean DEFAULT_IPROPHET = false;
+	
+	private final SettingsModelBoolean m_iprophet =
+			new SettingsModelBoolean(ProteinProphetNodeModel.CFGKEY_IPROPHET, ProteinProphetNodeModel.DEFAULT_IPROPHET);
 	
 	
 	static final String CFGKEY_DECOYPREFIX = "Decoyprefix";
@@ -188,7 +203,7 @@ public class ProteinProphetNodeModel extends ExtToolOutputNodeModel {
 		LinkedList<String> externalErrorOutput = new LinkedList<String>();
 		
 		ProteinProphetRunnable pprunner =
-				new ProteinProphetRunnable(inputFiles, fastaFile, enzyme, m_pepprob.getDoubleValue(),
+				new ProteinProphetRunnable(inputFiles, fastaFile, enzyme, m_pepprob.getDoubleValue(), m_iprophet.getBooleanValue(),
 						m_decoyprefix.getStringValue(), m_threads.getIntValue(), execXinteract.getAbsolutePath(),
 						execProteinProphet.getAbsolutePath(), dir.getAbsolutePath(),
 						externalOutput, externalErrorOutput);
@@ -270,11 +285,20 @@ public class ProteinProphetNodeModel extends ExtToolOutputNodeModel {
 		BufferedWriter bw = new BufferedWriter(out);
 		
 		Pattern se_pattern = Pattern.compile(".*search_engine=\"([^\"]*)\".*");
+		Pattern pepprob_pattern = Pattern.compile(".*peptideprophet_result .*probability=\"([^\"]*)\".*");
+		boolean correctprobs = m_correctprobs.getBooleanValue();
 		
 		while ((line = br.readLine()) != null) {
 			Matcher se_matcher = se_pattern.matcher(line);
+			Matcher pepprob_matcher = pepprob_pattern.matcher(line);
+			
 			if (se_matcher.matches()) {
+				// change the name of the search engine to avoid "corrections" for OMSSA (which in this case will be wrong)
 				line = line.replaceAll("search_engine=\"[^\"]*\"", "search_engine=\"" + se_matcher.group(1) + "-correct\"");
+			} else if (correctprobs && pepprob_matcher.matches()) {
+				// correct the probabilities from error probabilities
+				Double newProb = 1.0 - Double.parseDouble(pepprob_matcher.group(1));
+				line = line.replaceAll(pepprob_matcher.group(1), newProb.toString());
 			}
 			
 			bw.append(line);
@@ -356,7 +380,6 @@ public class ProteinProphetNodeModel extends ExtToolOutputNodeModel {
 				throw new InvalidSettingsException("Failed to find matching binary for ProteinProphet in '" + path + "'.");
 			}
 		} catch (URISyntaxException e) {
-			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
 		
@@ -375,6 +398,8 @@ public class ProteinProphetNodeModel extends ExtToolOutputNodeModel {
 	protected void saveSettingsTo(final NodeSettingsWO settings) {
 		m_enzyme.saveSettingsTo(settings);
 		m_pepprob.saveSettingsTo(settings);
+		m_correctprobs.saveSettingsTo(settings);
+		m_iprophet.saveSettingsTo(settings);
 		m_decoyprefix.saveSettingsTo(settings);
 		m_threads.saveSettingsTo(settings);
 	}
@@ -388,6 +413,8 @@ public class ProteinProphetNodeModel extends ExtToolOutputNodeModel {
 			throws InvalidSettingsException {
 		m_enzyme.loadSettingsFrom(settings);
 		m_pepprob.loadSettingsFrom(settings);
+		m_correctprobs.loadSettingsFrom(settings);
+		m_iprophet.loadSettingsFrom(settings);
 		m_decoyprefix.loadSettingsFrom(settings);
 		m_threads.loadSettingsFrom(settings);
 	}
@@ -401,6 +428,8 @@ public class ProteinProphetNodeModel extends ExtToolOutputNodeModel {
 			throws InvalidSettingsException {
 		m_enzyme.validateSettings(settings);
 		m_pepprob.validateSettings(settings);
+		m_correctprobs.validateSettings(settings);
+		m_iprophet.validateSettings(settings);
 		m_decoyprefix.validateSettings(settings);
 		m_threads.validateSettings(settings);
 	}

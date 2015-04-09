@@ -21,6 +21,9 @@ public class ProteinProphetRunnable implements Runnable {
 	/** the minimal peptide probability to use */
 	private Double peptide_prob;
 	
+	/** whether to use iProphet */
+	private Boolean use_iprophet;
+	
 	/** the decoy prefix */
 	private String decoyPrefix;
 	
@@ -52,13 +55,15 @@ public class ProteinProphetRunnable implements Runnable {
 	private String excelFile;
 	
 	
-	public ProteinProphetRunnable(List<String> pepXMLfiles, String fastaFile, String enzyme, Double peptide_prob, String decoyPrefix,
-			Integer threads, String execXinteract, String execProteinProphet, String executionDirectory,
+	public ProteinProphetRunnable(List<String> pepXMLfiles, String fastaFile, String enzyme, Double peptide_prob, 
+			Boolean use_iprophet, String decoyPrefix, Integer threads, String execXinteract, String execProteinProphet,
+			String executionDirectory,
 			List<String> output, List<String> errorOutput) {
 		this.pepXMLfiles = pepXMLfiles;
 		this.fastaFile = fastaFile;
 		this.enzyme = enzyme;
 		this.peptide_prob = peptide_prob;
+		this.use_iprophet = use_iprophet;
 		this.decoyPrefix = decoyPrefix;
 		this.threads = threads;
 		this.execXinteract = execXinteract;
@@ -80,9 +85,14 @@ public class ProteinProphetRunnable implements Runnable {
 				"-nP",
 				"-Ot",
 				"-d" + decoyPrefix,
-				"-THREADS=" + threads,
-				"-i",
-				"-N" + executionDirectory + File.separator + "xinteractout.pep.xml");
+				"-THREADS=" + threads);
+		
+		if (use_iprophet) {
+			processB.command().add("-i");
+		}
+		
+		processB.command().add("-N" + executionDirectory + File.separator + "xinteractout.pep.xml");
+		
 		processB.command().addAll(pepXMLfiles);
 		
 		try {
@@ -110,12 +120,16 @@ public class ProteinProphetRunnable implements Runnable {
 			stdError = null;
 			processB = new ProcessBuilder(
 					execProteinProphet,
-					executionDirectory + File.separator + "xinteractout.ipro.pep.xml",
-					executionDirectory + File.separator + "proteinprophet.protXML",
-					"IPROPHET",
-					"MINPROB" + peptide_prob,
-					"NOPLOT",
-					"EXCELPEPS");
+					executionDirectory + File.separator + "xinteractout.pep.xml",
+					executionDirectory + File.separator + "proteinprophet.protXML");
+			
+			if (use_iprophet) {
+				processB.command().add("IPROPHET");
+			}
+
+			processB.command().add("MINPROB" + peptide_prob);
+			processB.command().add("NOPLOT");
+			processB.command().add("EXCELPEPS");
 			
 			runningProcess = processB.start();
 			
